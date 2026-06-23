@@ -5,17 +5,27 @@
 **Hard rule**: AI agents must not edit this file and must not draft paste-ready content for it.
 
 ## The Problem
-_State clearly what you are trying to achieve and the architectural constraints, avoiding implementation specifics of HOW to do it. Focus on WHAT and WHY._
+Precisa fazer 1. Cadastro/login por email e senha, Logout funcional, Dados de autenticacao persistidos no SQLite. Tem que criptar a senha por questões de segurança, token na sessão simples, uma tela de login simples.
 
 ## Steps
-- [ ] _Decompose the problem into actionable logical steps._
-- [ ] _Each step should represent a verifiable piece of work._
+- [ ] Criar tabela `users` no SQLite com campos `id`, `email` (unique), `password_hash`, `created_at`
+- [ ] Configurar hash de senha com bcrypt na camada de serviço
+- [ ] Endpoint de registro: valida email/senha, gera hash, insere no banco, retorna 409 se email duplicado
+- [ ] Endpoint de login: busca por email, compara hash, gera token de sessão simples (ex: UUID aleatório salvo no banco)
+- [ ] Persistir token no cliente (localStorage) e criar guard que bloqueia rotas sem token
+- [ ] Tela de login/cadastro simples com campos email + senha
+- [ ] Em caso de falha no login, exibir "E-mail ou senha incorretos" sem distinguir qual está errado
+- [ ] Endpoint de logout: deleta token do banco
+- [ ] No cliente, logout remove token do localStorage e redireciona para login
 
 ## Success Looks Like
-- [ ] _Define rigorous, observable criteria for success. E.g., The endpoint returns 200 OK with the user object, NOT Code compiles_
+- [ ] COnseguir fazer cadastro com sucesso no banco
+- [ ] Entrar na plataforma com sucesso com as credenciais certas
+- [ ] Se inserir credenciais erradas, mostrar erro humanizado falando que e-mail ou senha errados(para nao entregar qual esta errado de cara)
+- [ ] Poder sair normalmente
 
 ## Notes
-- [ ] _Any specific edge cases, libraries to consider, or potential pitfalls._
+- [ ] Não pode deixar entrar usuarios com credenciais erradas
 
 ---
 **⚠️ HUMAN ONLY**: This file is your strategic space. AI agents must not edit it.

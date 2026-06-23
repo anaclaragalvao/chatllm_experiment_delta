@@ -11,6 +11,7 @@ const WELCOME_MESSAGE = {
 };
 
 function App() {
+  const [authenticated, setAuthenticated] = useState(!!localStorage.getItem("auth_token"));
   const [sessions, setSessions] = useState([]);
   const [activeSessionId, setActiveSessionId] = useState(null);
   const [messages, setMessages] = useState([WELCOME_MESSAGE]);
@@ -27,8 +28,28 @@ function App() {
     [messages]
   );
 
+  const handleAuthSuccess = useCallback(() => {
+    setAuthenticated(true);
+  }, []);
+
+  const handleLogout = useCallback(async () => {
+    try {
+      await logoutUser();
+    } catch {
+      // Ignore errors on logout
+    }
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("auth_email");
+    localStorage.removeItem("auth_user_id");
+    setAuthenticated(false);
+    setSessions([]);
+    setActiveSessionId(null);
+    setMessages([WELCOME_MESSAGE]);
+  }, []);
+
   // Load sessions on mount
   useEffect(() => {
+    if (!authenticated) return;
     fetchSessions()
       .then((list) => {
         setSessions(list);
@@ -38,7 +59,7 @@ function App() {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [authenticated]);
 
   const loadMessages = useCallback(async (sessionId) => {
     try {
@@ -225,6 +246,11 @@ function App() {
 
   const toggleSidebar = () => setSidebarOpen((prev) => !prev);
 
+  // If not authenticated, show login screen
+  if (!authenticated) {
+    return <Login onAuthSuccess={handleAuthSuccess} />;
+  }
+
   return (
     <div className="app-layout">
       {/* Sidebar */}
@@ -259,6 +285,12 @@ function App() {
             </div>
           ))}
         </nav>
+        <div className="sidebar-footer">
+          <span className="sidebar-email">{localStorage.getItem("auth_email")}</span>
+          <button className="sidebar-logout-btn" onClick={handleLogout} title="Sair">
+            Sair
+          </button>
+        </div>
       </aside>
 
       {/* Main area */}
